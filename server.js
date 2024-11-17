@@ -4,6 +4,7 @@ const connectDB = require('./db/connect');
 const courseRoutes = require('./routes/courseRoutes'); // Import course routes
 const professorRoutes = require('./routes/professorRoutes'); // Import professor routes
 const attendanceRoutes = require('./routes/attendanceRoutes'); // Import attendance routes
+const studentRoutes = require('./routes/studentRoutes'); // Import attendance routes
 
 // Initialize environment variables and database connection
 dotenv.config();
@@ -20,9 +21,10 @@ app.get('/', (req, res) => {
 });
 
 // Route Registrations
-app.use('/api/courses', courseRoutes); // Course routes
+app.use('/api/course', courseRoutes); // Course routes
 app.use('/api/professor', professorRoutes); // Professor routes
 app.use('/api/attendance', attendanceRoutes); // Attendance routes
+app.use('/api/student', studentRoutes); // Attendance routes
 
 // Start the server
 const PORT = process.env.PORT || 5000;
