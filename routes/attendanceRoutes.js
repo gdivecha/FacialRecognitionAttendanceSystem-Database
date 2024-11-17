@@ -11,7 +11,7 @@ const checkAuthorization = (req, res, next) => {
 };
 
 // 1. **Create Attendance** (POST /api/attendance)
-router.post('/', checkAuthorization, async (req, res) => {
+router.post('/createAttendanceRecord', checkAuthorization, async (req, res) => {
   try {
     const { courseCode } = req.body;
 
