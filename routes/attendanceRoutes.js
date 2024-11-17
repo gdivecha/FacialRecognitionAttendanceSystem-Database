@@ -10,7 +10,6 @@ const checkAuthorization = (req, res, next) => {
   next();
 };
 
-// 1. **Create Attendance** (POST /api/attendance)
 router.post('/createAttendanceRecord', checkAuthorization, async (req, res) => {
     try {
       const { courseCode } = req.body;
