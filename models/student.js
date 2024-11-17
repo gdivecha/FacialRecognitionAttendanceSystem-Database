@@ -26,8 +26,9 @@ const StudentSchema = new mongoose.Schema({
   ],
   faceImages: [
     {
-      data: Buffer, // Optional binary data for images
-      contentType: String, // Optional MIME type (e.g., "image/png")
+      _id: { type: mongoose.Schema.Types.ObjectId, default: () => new mongoose.Types.ObjectId() }, // Unique identifier for each image
+      data: Buffer,        // Binary image data
+      contentType: String, // MIME type (e.g., "image/png")
     },
   ],
   attendance: [

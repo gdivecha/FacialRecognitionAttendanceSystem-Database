@@ -1,5 +1,7 @@
 const express = require('express');
+const multer = require('multer');
 const router = express.Router();
+const mongoose = require('mongoose');
 const Student = require('../models/student'); // Import the Student model
 
 // Middleware to check authorization
@@ -274,6 +276,120 @@ router.put('/attachAttendanceToStudent', checkAuthorization, async (req, res) =>
         message: 'Error attaching attendance record to student',
         error: error.message,
       });
+    }
+});
+
+
+// Configure Multer for handling file uploads in memory
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
+
+// Route to upload multiple face images for a student
+router.put('/uploadStudentFaceImages', checkAuthorization, upload.array('images', 10), async (req, res) => {
+    try {
+      const { studentID } = req.body; // Get studentID from the request
+      const files = req.files; // Get uploaded files
+  
+      // Validate inputs
+      if (!studentID || !files || files.length === 0) {
+        return res.status(400).json({ message: 'studentID and images are required' });
+      }
+  
+      // Find the student by their studentID
+      const student = await Student.findOne({ studentID });
+      if (!student) {
+        return res.status(404).json({ message: 'Student not found' });
+      }
+  
+      // Add each uploaded image to the faceImages array
+      files.forEach((file) => {
+        student.faceImages.push({
+          _id: new mongoose.Types.ObjectId(), // Explicitly create an ObjectId for each image
+          data: file.buffer,
+          contentType: file.mimetype,
+        });
+      });
+  
+      // Save the updated student document
+      await student.save();
+  
+      res.status(200).json({
+        message: `${files.length} images uploaded successfully`,
+        studentId: student.studentID,
+        addedImages: student.faceImages.slice(-files.length), // Return details of the newly added images
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Error uploading images', error: error.message });
+    }
+});
+
+router.get('/getStudentImages', checkAuthorization, async (req, res) => {
+    try {
+        const { studentID } = req.query; // Get the student ID from query params
+  
+        // Validate the input
+        if (!studentID) {
+            return res.status(400).json({ message: 'studentID is required' });
+        }
+
+        // Find the student by their studentID (ensure trimmed and case-insensitive)
+        const student = await Student.findOne({ studentID: studentID.trim() });
+        if (!student) {
+            return res.status(404).json({ message: 'Student not found' });
+        }
+
+        // Convert the images into base64 format
+        const images = student.faceImages.map((image) => ({
+            _id: image._id, // Include the unique image ID for frontend reference
+            data: `data:${image.contentType};base64,${image.data.toString('base64')}`, // Convert binary data to base64
+            contentType: image.contentType, // Include MIME type
+        }));
+
+        // Send the images in the response
+        res.status(200).json({
+            message: `${images.length} images retrieved successfully`,
+            images,
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching images', error: error.message });
+    }
+});
+
+router.delete('/deleteStudentImage', checkAuthorization, async (req, res) => {
+    try {
+      const { studentID, imageID } = req.query; // Get student ID and image ID from query params
+  
+      // Validate inputs
+      if (!studentID || !imageID) {
+        return res.status(400).json({ message: 'studentID and imageID are required' });
+      }
+  
+      // Find the student by their studentID
+      const student = await Student.findOne({ studentID });
+      if (!student) {
+        return res.status(404).json({ message: 'Student not found' });
+      }
+  
+      // Find and remove the image by its ID
+      const initialLength = student.faceImages.length;
+      student.faceImages = student.faceImages.filter(
+        (image) => image._id.toString() !== imageID
+      );
+  
+      // Check if the image was removed
+      if (student.faceImages.length === initialLength) {
+        return res.status(404).json({ message: 'Image not found' });
+      }
+  
+      // Save the updated student document
+      await student.save();
+  
+      res.status(200).json({
+        message: `Image with ID ${imageID} deleted successfully`,
+        studentId: student.studentID,
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Error deleting image', error: error.message });
     }
 });
 

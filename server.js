@@ -17,14 +17,14 @@ app.use(express.json());
 
 // Health Check Endpoint
 app.get('/', (req, res) => {
-    res.send('AITend-Backend API is running');
+    res.send('AITend-Database API is running');
 });
 
 // Route Registrations
 app.use('/api/course', courseRoutes); // Course routes
 app.use('/api/professor', professorRoutes); // Professor routes
 app.use('/api/attendance', attendanceRoutes); // Attendance routes
-app.use('/api/student', studentRoutes); // Attendance routes
+app.use('/api/student', studentRoutes); // Student routes
 
 // Start the server
 const PORT = process.env.PORT || 5000;
