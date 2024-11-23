@@ -36,6 +36,39 @@ router.get('/getStudent', checkAuthorization, async (req, res) => {
   }
 });
 
+router.get('/getStudentInformation', checkAuthorization, async (req, res) => {
+  try {
+    const { studentObjectID } = req.query;
+
+    // Validate that studentObjectID is provided
+    if (!studentObjectID) {
+      return res.status(400).json({
+        message: 'studentObjectID query parameter is required',
+      });
+    }
+
+    // Find the student by studentObjectID and include the courses array
+    const student = await Student.findById(studentObjectID).select(
+      'firstName lastName email studentID courses'
+    );
+
+    // Return the result
+    if (student) {
+      res.status(200).json({
+        firstName: student.firstName,
+        lastName: student.lastName,
+        email: student.email,
+        studentID: student.studentID,
+        courses: student.courses, // Directly return the array of course Object IDs
+      });
+    } else {
+      res.status(404).json({ message: 'Student not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching student information', error: error.message });
+  }
+});
+
 // **createStudentAPI**: Create a new student
 router.post('/createStudent', checkAuthorization, async (req, res) => {
     try {
