@@ -106,4 +106,32 @@ router.delete('/deleteCourse', checkAuthorization, async (req, res) => {
   }
 });
 
+router.get('/getCourseIDFromObjectID', checkAuthorization, async (req, res) => {
+  try {
+    const { courseObjectID } = req.query;
+
+    // Validate that courseObjectID is provided
+    if (!courseObjectID) {
+      return res.status(400).json({
+        message: 'courseObjectID query parameter is required',
+      });
+    }
+
+    // Find the course by courseObjectID
+    const course = await Course.findById(courseObjectID, 'courseCode');
+
+    // Return the result
+    if (course) {
+      res.status(200).json({
+        courseID: course.courseCode, // Include the courseCode as courseID
+      });
+    } else {
+      res.status(404).json({ message: 'Course not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching course information', error: error.message });
+  }
+});
+
+
 module.exports = router;
