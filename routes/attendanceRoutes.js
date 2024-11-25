@@ -31,26 +31,31 @@ router.post('/createAttendanceRecord', checkAuthorization, async (req, res) => {
 });
 
 router.get('/getAttendanceTimestamp', checkAuthorization, async (req, res) => {
-    try {
-      const { attendanceId } = req.query;
-  
-      // Validate that attendanceId is provided
-      if (!attendanceId) {
-        return res.status(400).json({ message: 'attendanceId query parameter is required' });
-      }
-  
-      // Find the attendance record by ObjectId
-      const attendance = await Attendance.findById(attendanceId);
-  
-      if (!attendance) {
-        return res.status(404).json({ message: 'Attendance record not found' });
-      }
-  
-      // Return the timestamp
-      res.status(200).json({ timestamp: attendance.timestamp });
-    } catch (error) {
-      res.status(500).json({ message: 'Error fetching attendance timestamp', error: error.message });
+  try {
+    const { attendanceId, courseCode } = req.query;
+
+    // Validate that attendanceId and courseCode are provided
+    if (!attendanceId || !courseCode) {
+      return res.status(400).json({ message: 'attendanceId and courseCode query parameters are required' });
     }
+
+    // Find the attendance record by ObjectId
+    const attendance = await Attendance.findById(attendanceId);
+
+    if (!attendance) {
+      return res.status(404).json({ message: 'Attendance record not found' });
+    }
+
+    // Check if the courseCode matches
+    if (attendance.courseCode !== courseCode) {
+      return res.status(400).json({ message: 'Course code does not match the attendance record' });
+    }
+
+    // Return the timestamp
+    res.status(200).json({ timestamp: attendance.timestamp });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching attendance timestamp', error: error.message });
+  }
 });
 
 module.exports = router;

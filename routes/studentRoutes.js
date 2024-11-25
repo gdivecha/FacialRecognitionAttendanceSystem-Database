@@ -36,6 +36,36 @@ router.get('/getStudent', checkAuthorization, async (req, res) => {
   }
 });
 
+router.get('/getStudentAttendanceRecords', checkAuthorization, async (req, res) => {
+  try {
+    const { studentObjectID } = req.query; // Extract the query parameter
+
+    // Validate that studentObjectID is provided
+    if (!studentObjectID) {
+      return res.status(400).json({
+        message: 'studentObjectID query parameter is required',
+      });
+    }
+
+    // Find the student by studentObjectID and include the attendance array
+    const student = await Student.findById(studentObjectID).select('attendance');
+
+    // Return the result
+    if (student) {
+      res.status(200).json({
+        attendance: student.attendance, // Return the attendance array
+      });
+    } else {
+      res.status(404).json({ message: 'Student not found' });
+    }
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error fetching attendance records',
+      error: error.message,
+    });
+  }
+});
+
 router.get('/getStudentInformation', checkAuthorization, async (req, res) => {
   try {
     const { studentObjectID } = req.query;
