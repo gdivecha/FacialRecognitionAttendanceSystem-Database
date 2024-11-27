@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5001:5000" # Map host port 5001 to container port 5000
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://db:27017/aitend-database # MongoDB connection string
+    depends_on:
+      - db # Wait for the database service to start
+
+  db:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017" # Expose MongoDB's default port
+    volumes:
+      - mongo-data:/data/db # Persist MongoDB data
+
+volumes:
+  mongo-data:
