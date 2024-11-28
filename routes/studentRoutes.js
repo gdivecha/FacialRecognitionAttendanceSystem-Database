@@ -386,38 +386,6 @@ router.put('/uploadStudentFaceImages', checkAuthorization, upload.array('images'
     }
 });
 
-router.get('/getStudentImages', checkAuthorization, async (req, res) => {
-    try {
-        const { studentID } = req.query; // Get the student ID from query params
-  
-        // Validate the input
-        if (!studentID) {
-            return res.status(400).json({ message: 'studentID is required' });
-        }
-
-        // Find the student by their studentID (ensure trimmed and case-insensitive)
-        const student = await Student.findOne({ studentID: studentID.trim() });
-        if (!student) {
-            return res.status(404).json({ message: 'Student not found' });
-        }
-
-        // Convert the images into base64 format
-        const images = student.faceImages.map((image) => ({
-            _id: image._id, // Include the unique image ID for frontend reference
-            data: `data:${image.contentType};base64,${image.data.toString('base64')}`, // Convert binary data to base64
-            contentType: image.contentType, // Include MIME type
-        }));
-
-        // Send the images in the response
-        res.status(200).json({
-            message: `${images.length} images retrieved successfully`,
-            images,
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Error fetching images', error: error.message });
-    }
-});
-
 router.delete('/deleteStudentImage', checkAuthorization, async (req, res) => {
     try {
       const { studentID, imageID } = req.query; // Get student ID and image ID from query params
