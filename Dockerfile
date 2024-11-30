@@ -10,11 +10,11 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install
 
-# Copy the rest of the application code
+# Copy the application code
 COPY . .
 
 # Expose the port your server will run on
 EXPOSE 5001
 
-# Start the server
-CMD ["node", "server.js"]
+# Initialize the database and start the server
+CMD ["sh", "-c", "node initializeDB/initMongo.js && node server.js"]
