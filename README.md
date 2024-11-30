@@ -1,75 +1,62 @@
-# Postman Setup for AITend Database API
+# FacialRecognitionAttendanceSystem - Database
 
-## Overview
-This README provides step-by-step instructions for setting up Postman to test the AITend API, including configuring requests, setting environment variables, and setting up an authorization token.
-
----
+This is the **database service** for the Facial Recognition Attendance System. It handles data storage and retrieval using MongoDB.
 
 ## Prerequisites
-- Ensure the AITend server is running. Start the server using:
-  `npm start`
-  or
-  `node server.js`
-- Default port: 5001.
-  - Install Postman from here.
 
----
+- Node.js (version 18 or higher)
+- Docker and Docker Compose
+- MongoDB (if running locally without Docker)
 
-## Step 1: Import the Postman Collection
-1. Open Postman.
-2. Click on Import in the top-left corner.
-3. Select the JSON file for the Postman collection (if provided) or manually add the endpoints based on the API structure:
-    - POST /api/courses/createCourse
-    - GET /api/courses/getCourseFromCourseCode
-    - GET /api/courses/getCoursesFromProfEmail
-    - DELETE /api/courses/deleteCourse
+## Environment Variables
 
----
+Create a `.env` file with the following variables:
 
-## Step 2: Set Up Environment Variables
-1. Create a New Environment:
-    - Go to the gear icon in the top-right corner and click Manage Environments.
-    - Click Add to create a new environment.
-    - Name the environment AITend-Database.
-2. Add Variables:
-    - Add the following variables to the environment:
+PORT=5001
+MONGO_URI=mongodb://mongodb:27017/AITend
 
-3. Save the environment.
+## Run Locally
 
----
+1. Install dependencies:
+   npm install
 
-## Step 3: Configure Authorization Token
-1. Go to the Authorization tab in any request.
-2. Set the type to Bearer Token.
-3. In the token field, use the variable {{authToken}}.
-4. Ensure the variable authToken is set in the environment (as described in Step 2).
+2. Start the database service:
+   npm start
 
----
+3. The service will run at http://localhost:5001.
 
-## Step 4: Add Requests
-- Base URL: Use the environment variable {{baseUrl}} for all requests. For example:
-  - {{baseUrl}}/api/courses/createCourse
-  - {{baseUrl}}/api/courses/getCourseFromCourseCode
-  - {{baseUrl}}/api/courses/getCoursesFromProfEmail
-  - {{baseUrl}}/api/courses/deleteCourse
+Ensure MongoDB is running locally or specify the correct MONGO_URI in `.env`.
 
----
+## Docker Instructions
 
-## Step 5: Test the API
-1. Select the AITend-Database environment in Postman.
-2. Send requests to each endpoint using the instructions above.
-3. Check the Headers, Params, and Body tabs to ensure all fields are set correctly.
+### Build and Run with Docker
 
----
+1. Build the Docker image:
+   docker build -t database .
 
-## Troubleshooting
-1. 404 Not Found:
-  - Ensure the correct route is being called.
-  - Verify the baseUrl and endpoint path.
-2. Empty Responses:
-  - Ensure the database contains the data you’re querying.
-  - Use the createCourse API to add data.
-3. 500 Server Error:
-  - Check the server logs for detailed error messages.
+2. Run the container:
+   docker run -p 5001:5001 --env-file .env database
 
----
+### Using Docker Compose
+
+Ensure the following `docker-compose.yml` file exists in the root directory:
+
+version: '3.9'
+
+services:
+  database:
+    build:
+      context: ./FacialRecognitionAttendanceSystem-Database
+    container_name: database
+    ports:
+      - "5001:5001"
+    depends_on:
+      - mongodb
+    environment:
+      - PORT=5001
+      - MONGO_URI=mongodb://mongodb:27017/AITend
+    restart: always
+
+Run the following command:
+
+docker-compose up --build
